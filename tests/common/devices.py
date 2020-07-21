@@ -337,7 +337,8 @@ class SonicHost(AnsibleHostBase):
         # get critical process list for the service
         output = self.command("docker exec {} bash -c '[ -f /etc/supervisor/critical_processes ] && cat /etc/supervisor/critical_processes'".format(service), module_ignore_errors=True)
         for l in output['stdout'].split():
-            critical_process_list.append(l.rstrip())
+            # If ':' exists, the second field is got. Otherwise the only field is got.
+            critical_process_list.append(l.split(':')[-1].rstrip())
         if len(critical_process_list) == 0:
             return result
 
@@ -593,6 +594,25 @@ default via fc00::7e dev PortChannel0004 proto 186 src fc00:1::32 metric 20  pre
         logging.info("route parsed info for {}: {}".format(dstip, rtinfo))
 
         return rtinfo
+
+    def check_default_route(self, ipv4=True, ipv6=True):
+        """
+        @summary: return default route status
+
+        @param ipv4: check ipv4 default
+        @param ipv6: check ipv6 default
+        """
+        if ipv4:
+            rtinfo_v4 = self.get_ip_route_info(ipaddress.ip_address(u'0.0.0.0'))
+            if len(rtinfo_v4['nexthops']) == 0:
+                return False
+
+        if ipv6:
+            rtinfo_v6 = self.get_ip_route_info(ipaddress.ip_address(u'::'))
+            if len(rtinfo_v6['nexthops']) == 0:
+                return False
+
+        return True
 
     def get_bgp_neighbor_info(self, neighbor_ip):
         """
