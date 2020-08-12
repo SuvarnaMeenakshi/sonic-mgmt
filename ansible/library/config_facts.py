@@ -82,6 +82,9 @@ def create_maps(config):
     'port_index_map' : port_index_map
     }
 
+def create_mgmt_port_map(config):
+    mgmt_port_name_to_alias_map =  { name : v['alias'] for name, v in config["MGMT_PORT"].iteritems()}
+    return {'mgmt_port_name_to_alias_map' : mgmt_port_name_to_alias_map}
 
 def get_running_config(module):
 
@@ -103,6 +106,22 @@ def get_facts(config):
 
     results.update(create_maps(config))
 
+    results.update(create_mgmt_port_map(config))
+
+    return results
+
+def get_global_db_facts(config):
+    """ Create the global facts dict 
+        for multi-asic platform."""
+
+    Tree = lambda: defaultdict(Tree)
+
+    results = Tree()
+
+    results.update(format_config(config))
+
+    results.update(create_mgmt_port_map(config))
+
     return results
 
 def main():
@@ -110,7 +129,7 @@ def main():
         argument_spec=dict(
             host=dict(required=True),
             source=dict(required=True, choices=["running", "persistent"]),
-            filename=dict(),
+            filename=dict(), num_asic=dict(default=1),
         ),
         supports_check_mode=True
     )
@@ -118,21 +137,34 @@ def main():
     m_args = module.params
     try:
         config = {}
-        
-        if m_args["source"] == "persistent":
+        results = {}
+        num_asic=int(m_args["num_asic"])
+        # If source is persistent and config db filename is not provided
+        # get config facts for all asics.
+        if m_args["source"] == "persistent" and num_asic > 1:
+            cfg_file_path = PERSISTENT_CONFIG_PATH
+            with open(cfg_file_path, "r") as f:
+                config = json.load(f)
+            results["global"] =  get_global_db_facts(config)
+            for asic in range(num_asic):
+                cfg_file_path = "/etc/sonic/config_db" + str(asic) + ".json"
+                with open(cfg_file_path, "r") as f:
+                    config = json.load(f)
+                results[asic] =  get_facts(config)
+        elif m_args["source"] == "persistent":
             if 'filename' in m_args and m_args['filename'] is not None:
                 cfg_file_path = "%s" % m_args['filename']
             else:
                 cfg_file_path = PERSISTENT_CONFIG_PATH
             with open(cfg_file_path, "r") as f:
                 config = json.load(f)
+            results = get_facts(config)
         elif m_args["source"] == "running":    
             config = get_running_config(module)
-        results = get_facts(config)
+            results = get_facts(config)
         module.exit_json(ansible_facts=results)
     except Exception as e:
         module.fail_json(msg=e.message)
-
 
 from ansible.module_utils.basic import AnsibleModule
 
