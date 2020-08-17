@@ -129,7 +129,7 @@ def main():
         argument_spec=dict(
             host=dict(required=True),
             source=dict(required=True, choices=["running", "persistent"]),
-            filename=dict(), num_asic=dict(default=1),
+            filename=dict(), num_asic=dict(type='int', default=1),
         ),
         supports_check_mode=True
     )
@@ -139,18 +139,16 @@ def main():
         config = {}
         results = {}
         num_asic=int(m_args["num_asic"])
-        # If source is persistent and config db filename is not provided
-        # get config facts for all asics.
-        if m_args["source"] == "persistent" and num_asic > 1:
+        if m_args["source"] == "persistent":
             cfg_file_path = PERSISTENT_CONFIG_PATH
             with open(cfg_file_path, "r") as f:
                 config = json.load(f)
-            results["global"] =  get_global_db_facts(config)
-            for asic in range(num_asic):
-                cfg_file_path = "/etc/sonic/config_db" + str(asic) + ".json"
-                with open(cfg_file_path, "r") as f:
-                    config = json.load(f)
-                results[asic] =  get_facts(config)
+            if num_asic > 1:
+                # if source is persistent, for multi-asic platform
+                # get global db facts.
+                results =  get_global_db_facts(config)
+            else:
+                results = get_facts(config)
         elif m_args["source"] == "persistent":
             if 'filename' in m_args and m_args['filename'] is not None:
                 cfg_file_path = "%s" % m_args['filename']
@@ -159,7 +157,7 @@ def main():
             with open(cfg_file_path, "r") as f:
                 config = json.load(f)
             results = get_facts(config)
-        elif m_args["source"] == "running":    
+        elif m_args["source"] == "running":
             config = get_running_config(module)
             results = get_facts(config)
         module.exit_json(ansible_facts=results)
