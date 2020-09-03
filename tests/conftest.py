@@ -194,6 +194,30 @@ def testbed(request):
     tbinfo = TestbedInfo(tbfile)
     return tbinfo.testbed_topo[tbname]
 
+@pytest.fixture(name="config_facts", scope="session")
+def fixture_config_facts(duthosts, request):
+    '''
+    @summary: Shortcut fixture for getting config facts.
+    @param duthosts: fixture to get DUT hosts
+    @param request: request parameters for duthost test fixture
+    '''
+    dut_index = getattr(request.session, "dut_index", 0)
+    assert dut_index < len(duthosts), \
+        "DUT index '{0}' is out of bound '{1}'".format(dut_index,
+                                                       len(duthosts))
+
+    duthost = duthosts[dut_index]
+
+    num_asics = duthost.num_asics()
+
+    config_facts = duthost.config_facts(host=duthost.hostname, source="persistent", num_asic=num_asics)['ansible_facts']
+    if num_asics == 1:
+        config_facts_map = {}
+        config_facts_map['global'] =  config_facts
+        config_facts_map[0] = config_facts
+        return config_facts_map
+    else:
+        return config_facts
 
 @pytest.fixture(name="duthosts", scope="session")
 def fixture_duthosts(ansible_adhoc, testbed):
