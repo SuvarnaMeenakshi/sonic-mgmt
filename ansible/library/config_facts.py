@@ -86,9 +86,10 @@ def create_mgmt_port_map(config):
     mgmt_port_name_to_alias_map =  { name : v['alias'] for name, v in config["MGMT_PORT"].iteritems()}
     return {'mgmt_port_name_to_alias_map' : mgmt_port_name_to_alias_map}
 
-def get_running_config(module):
+def get_running_config(module, namespace=""):
 
-    rt, out, err = module.run_command("sonic-cfggen -d --print-data")
+    command =  "sonic-cfggen -d --print-data -n " + namespace
+    rt, out, err = module.run_command(command)
     if rt != 0:
         module.fail_json(msg="Failed to dump running config! {}".format(err))
     json_info = json.loads(out)
@@ -160,8 +161,16 @@ def main():
                 config = json.load(f)
             results = get_facts(config)
         elif m_args["source"] == "running":
-            config = get_running_config(module)
-            results = get_facts(config)
+            if num_asic > 1:
+                config = get_running_config(module)
+                results['global'] = config
+                for asic_id in range(num_asic):
+                    namespace = 'asic' + str(asic_id)
+                    config = get_running_config(module, namespace)
+                    results[asic_id] = config
+            else:
+                config = get_running_config(module)
+                results = get_facts(config)
         module.exit_json(ansible_facts=results)
     except Exception as e:
         module.fail_json(msg=e.message)
