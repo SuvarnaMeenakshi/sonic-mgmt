@@ -163,11 +163,11 @@ def main():
         elif m_args["source"] == "running":
             if num_asic > 1:
                 config = get_running_config(module)
-                results['global'] = config
+                results["global"] =  get_global_db_facts(config)
                 for asic_id in range(num_asic):
                     namespace = 'asic' + str(asic_id)
                     config = get_running_config(module, namespace)
-                    results[asic_id] = config
+                    results[asic_id] = get_facts(config)
             else:
                 config = get_running_config(module)
                 results = get_facts(config)
