@@ -458,6 +458,24 @@ class SonicHost(AnsibleHostBase):
         """
         return self.facts["num_asic"]
 
+    def get_config_facts(self, source):
+        """
+        return a dict of config_facts
+        {u'global': global_config_facts,
+         u'0': asic0 config_facts,
+         ...}
+        """
+        num_asics = self.facts["num_asic"]
+
+        config_facts = self.config_facts(host=self.hostname, source=source, num_asic=num_asics)['ansible_facts']
+        if num_asics == 1:
+            config_facts_map = {}
+            config_facts_map[u'global'] =  config_facts
+            config_facts_map[u'0'] = config_facts
+            return config_facts_map
+        else:
+            return config_facts
+
     def get_syncd_docker_names(self):
         """
         @summary: get the list of syncd dockers names for the number of NPUs present on the DUT
