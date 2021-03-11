@@ -62,7 +62,7 @@ stages:
     - script: |
         pwd
         username=$(id -un)
-		rm -rf $(Build.ArtifactStagingDirectory)/*
+        rm -rf $(Build.ArtifactStagingDirectory)/*
         CMD="cd /data/sonic-mgmt/tests/ ; \
         export ANSIBLE_CONFIG=/data/sonic-mgmt/ansible ANSIBLE_LIBRARY=/data/sonic-mgmt/ansible/library/; \
         pytest snmp/test_snmp_default_route.py \
@@ -90,7 +90,7 @@ stages:
         fi
         cp -r /data/sonic-mgmt/tests/logs $(Build.ArtifactStagingDirectory)/
         sudo chown -R $username.$username $(Build.ArtifactStagingDirectory)
-	  displayName: "SNMP test"
+      displayName: "SNMP test"
       continueOnError: false
 
 
