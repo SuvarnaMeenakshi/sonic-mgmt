@@ -46,10 +46,9 @@ stages:
 
     - script: |
         sudo mkdir -p /data/sonic-vm/images
+        pushd /data/sonic-vm/images
         wget https://sonic-jenkins.westus2.cloudapp.azure.com/job/vs/job/buildimage-multiasic-vs-image-201911/lastSuccessfulBuild/artifact/target/sonic-vs.img.gz
         sudo gzip -fd /data/sonic-vm/images/sonic-vs.img.gz
-        docker rm -f sonic-mgmt || true
-        ./setup-container.sh -n sonic-mgmt
         username=$(id -un)
         sudo chown -R $username.$username /data/sonic-vm
         pushd /data/sonic-mgmt
@@ -57,6 +56,8 @@ stages:
         git reset --hard origin/master
         sed -i s/use_own_value/${username}/ ansible/veos_vtb
         echo aaa > ansible/password.txt
+        docker rm -f sonic-mgmt || true
+        ./setup-container.sh -n sonic-mgmt
         docker exec sonic-mgmt bash -c "pushd /data/sonic-mgmt/ansible;./testbed-cli.sh -d /data/sonic-vm -m $(inventory) -t $(testbed_file) -k ceos refresh-dut $(tbname) password.txt; ./testbed-cli.sh -m $(inventory) -t $(testbed_file) deploy-mg $(tbname) lab password.txt" && sleep 180
       displayName: "Setup t1-8-lag testbed"
 
