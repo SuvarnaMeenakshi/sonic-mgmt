@@ -1,0 +1,106 @@
+# Starter pipeline
+
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+
+# Add steps that build, run tests, deploy, and more:
+
+# https://aka.ms/yaml
+
+pr:
+- master
+
+name: $(TeamProject)_$(Build.DefinitionName)_$(SourceBranchName)_$(Date:yyyyMMdd)$(Rev:.r)
+
+resources:
+  repositories:
+  - repository: sonic-mgmt
+    type: github
+    name: Azure/sonic-mgmt
+    endpoint: build
+
+parameters:
+- name: iterations 
+  type: object
+  default: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100] 
+
+stages:
+- stage: Test
+  pool: sonictest
+  variables:
+  - name: dut
+    value: vlab-08
+  - name: tbname
+    value: vms-kvm-four-asic-t1-lag
+  - name: inventory
+    value: veos_vtb
+  - name: testbed_file
+    value: vtestbed.csv
+  - name: ptf_name
+    value: ptf_masic 
+
+  jobs:
+  - job: four_asic_vs_test 
+    displayName: "kvmmultiasictest"
+    timeoutInMinutes: 0
+    steps:
+
+    - script: |
+        sudo mkdir -p /data/sonic-vm/images
+        wget https://sonic-jenkins.westus2.cloudapp.azure.com/job/vs/job/buildimage-multiasic-vs-image-201911/lastSuccessfulBuild/artifact/target/sonic-vs.img.gz
+        sudo cp -v ./sonic-multiasic-vs.img.gz /data/sonic-vm/images/sonic-vs.img.gz
+        sudo gzip -fd /data/sonic-vm/images/sonic-vs.img.gz
+        username=$(id -un)
+        sudo chown -R $username.$username /data/sonic-vm
+        pushd /data/sonic-mgmt
+        git remote update
+        git reset --hard origin/master
+        sed -i s/use_own_value/${username}/ ansible/veos_vtb
+        echo aaa > ansible/password.txt
+        docker exec sonic-mgmt bash -c "pushd /data/sonic-mgmt/ansible;./testbed-cli.sh -d /data/sonic-vm -m $(inventory) -t $(testbed_file) -k ceos refresh-dut $(tbname) password.txt; ./testbed-cli.sh -m $(inventory) -t $(testbed_file) deploy-mg $(tbname) lab password.txt" && sleep 180
+      displayName: "Setup t1-8-lag testbed"
+
+    - script: |
+        pwd
+        username=$(id -un)
+		rm -rf $(Build.ArtifactStagingDirectory)/*
+        CMD="cd /data/sonic-mgmt/tests/ ; \
+        export ANSIBLE_CONFIG=/data/sonic-mgmt/ansible ANSIBLE_LIBRARY=/data/sonic-mgmt/ansible/library/; \
+        pytest snmp/test_snmp_default_route.py \
+              --testbed=$(tbname) --host-pattern=$(dut) --inventory=/data/sonic-mgmt/ansible/veos_vtb \
+              --testbed_file=/data/sonic-mgmt/ansible/vtestbed.csv --module-path=/data/sonic-mgmt/ansible/library \
+              --show-capture=no --log-cli-level=INFO  \
+              --skip_sanity --log-file=/data/sonic-mgmt/tests/logs/snmp"
+        docker exec sonic-mgmt bash -c "rm -rf /data/sonic-mgmt/tests/logs/snmp || true"
+        docker exec sonic-mgmt bash -c "$CMD"
+        if [ "${PIPESTATUS[0]}" -ne "0" ]; then
+            # save dut state if test fails
+            virsh_version=$(virsh --version)
+            if [ $virsh_version == "6.0.0" ]; then
+                mkdir -p $(Build.ArtifactStagingDirectory)/kvmdump
+                virsh -c qemu:///system list
+                virsh -c qemu:///system save $(dut) $(Build.ArtifactStagingDirectory)/kvmdump/$(dut).memdmp
+                virsh -c qemu:///system dumpxml $(dut) > $(Build.ArtifactStagingDirectory)/kvmdump/$(dut).xml
+                img=$(virsh -c qemu:///system domblklist $(dut) | grep vda | awk '{print $2}')
+                cp $img $(Build.ArtifactStagingDirectory)/kvmdump/$(dut).img
+                virsh -c qemu:///system undefine $(dut)
+            fi
+            docker commit $(ptf_name) docker-ptf:$(Build.BuildNumber)
+            docker save docker-ptf:$(Build.BuildNumber) | gzip -c > $(Build.ArtifactStagingDirectory)/kvmdump/docker-ptf-dump.gz
+            docker rmi docker-ptf:$(Build.BuildNumber)
+        fi
+        cp -r /data/sonic-mgmt/tests/logs $(Build.ArtifactStagingDirectory)/
+        sudo chown -R $username.$username $(Build.ArtifactStagingDirectory)
+	  displayName: "SNMP test"
+      continueOnError: false
+
+
+    - publish: $(Build.ArtifactStagingDirectory)/kvmdump
+      artifact: sonic-buildimage.kvmtest.memdump@$(System.JobAttempt)
+      displayName: "Archive sonic kvm memdump"
+      condition: failed()
+
+    - task: PublishTestResults@2
+      inputs:
+        testResultsFiles: '$(Build.ArtifactStagingDirectory)/logs/**/*.xml'
+        testRunTitle: kvmtest
+      condition: succeededOrFailed()
