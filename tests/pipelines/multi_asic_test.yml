@@ -51,8 +51,6 @@ stages:
         git reset --hard origin/master
         sed -i s/use_own_value/${username}/ ansible/veos_vtb
         echo aaa > ansible/password.txt
-        docker rm -f sonic-mgmt || true
-        ./setup-container.sh -n sonic-mgmt
         docker exec sonic-mgmt bash -c "pushd /data/sonic-mgmt/ansible;./testbed-cli.sh -d /data/sonic-vm -m $(inventory) -t $(testbed_file) -k ceos refresh-dut $(tbname) password.txt; ./testbed-cli.sh -m $(inventory) -t $(testbed_file) deploy-mg $(tbname) lab password.txt" && sleep 180
       displayName: "Setup t1-8-lag testbed"
 
