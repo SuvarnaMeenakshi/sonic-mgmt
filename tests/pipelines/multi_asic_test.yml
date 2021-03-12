@@ -57,7 +57,8 @@ stages:
         ./setup-container.sh -n sonic-mgmt
         sed -i s/use_own_value/${username}/ ansible/veos_vtb
         echo aaa > ansible/password.txt
-        docker exec sonic-mgmt bash -c "pushd /data/sonic-mgmt/ansible;./testbed-cli.sh -d /data/sonic-vm -m $(inventory) -t $(testbed_file) -k ceos refresh-dut $(tbname) password.txt; ./testbed-cli.sh -m $(inventory) -t $(testbed_file) deploy-mg $(tbname) lab password.txt" && sleep 180
+        parent_dir=$(basename $PWD)
+        docker exec sonic-mgmt bash -c "pushd /var/src/$parent_dir/ansible;./testbed-cli.sh -d /data/sonic-vm -m $(inventory) -t $(testbed_file) -k ceos refresh-dut $(tbname) password.txt; ./testbed-cli.sh -m $(inventory) -t $(testbed_file) deploy-mg $(tbname) lab password.txt" && sleep 180
       displayName: "Setup t1-8-lag testbed"
 
     - script: |
