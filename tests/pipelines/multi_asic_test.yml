@@ -47,8 +47,9 @@ stages:
         username=$(id -un)
         sudo chown -R $username.$username /data/sonic-vm
         pushd  /data/sonic-mgmt
-        git remote update
-        git reset --hard origin/master
+        git remote add sumeenak git@github.com:SuvarnaMeenakshi/sonic-mgmt.git
+        git fetch sumeenak
+        git checkout sumeenak/masic_azpipeline
         docker rm -f sonic-mgmt || true
         ./setup-container.sh -n sonic-mgmt
         sed -i s/use_own_value/${username}/ ansible/veos_vtb
