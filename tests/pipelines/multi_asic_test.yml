@@ -15,7 +15,7 @@ resources:
   repositories:
   - repository: sonic-mgmt
     type: github
-    name: Azure/sonic-mgmt
+    name: SuvarnaMeenakshi/sonic-mgmt
     endpoint: build
 
 stages:
@@ -47,9 +47,8 @@ stages:
         username=$(id -un)
         sudo chown -R $username.$username /data/sonic-vm
         pushd  /data/sonic-mgmt
-        git remote add sumeenak git@github.com:SuvarnaMeenakshi/sonic-mgmt.git
-        git fetch sumeenak
-        git checkout remotes/sumeenak/masic_fixes
+        git remote update
+        git reset --hard origin/masic_fixes
         docker rm -f sonic-mgmt || true
         ./setup-container.sh -n sonic-mgmt
         sed -i s/use_own_value/${username}/ ansible/veos_vtb
