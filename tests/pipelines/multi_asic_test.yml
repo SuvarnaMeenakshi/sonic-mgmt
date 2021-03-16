@@ -61,14 +61,15 @@ stages:
         pwd
         username=$(id -un)
         rm -rf $(Build.ArtifactStagingDirectory)/*
-        CMD="cd /data/sonic-mgmt/tests/ ; \
-        export ANSIBLE_CONFIG=/data/sonic-mgmt/ansible ANSIBLE_LIBRARY=/data/sonic-mgmt/ansible/library/; \
+        parent_dir=$(basename $PWD)
+        CMD="cd /var/src/$parent_dir/tests; \
+        export ANSIBLE_CONFIG=/var/src/$parent_dir/ansible ANSIBLE_LIBRARY=/var/src/$parent_dir/ansible; \
         pytest snmp/test_snmp_default_route.py \
               --testbed=$(tbname) --host-pattern=$(dut) --inventory=/data/sonic-mgmt/ansible/veos_vtb \
               --testbed_file=/data/sonic-mgmt/ansible/vtestbed.csv --module-path=/data/sonic-mgmt/ansible/library \
               --show-capture=no --log-cli-level=INFO  \
               --skip_sanity --log-file=/data/sonic-mgmt/tests/logs/snmp"
-        docker exec sonic-mgmt bash -c "rm -rf /data/sonic-mgmt/tests/logs/snmp || true"
+        docker exec sonic-mgmt bash -c "rm -rf /var/src/$parent_dir/tests/logs/snmp || true"
         docker exec sonic-mgmt bash -c "$CMD"
         if [ "${PIPESTATUS[0]}" -ne "0" ]; then
             # save dut state if test fails
