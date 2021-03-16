@@ -47,10 +47,11 @@ stages:
         username=$(id -un)
         sudo chown -R $username.$username /data/sonic-vm
         pushd  /data/sonic-mgmt
+        git remote add sumeenak git@github.com:SuvarnaMeenakshi/sonic-mgmt.git
         git remote update
         echo $PWD
         git branch -a
-        git checkout origin/masic_fixes
+        git checkout sumeenak/masic_fixes
         docker rm -f sonic-mgmt || true
         ./setup-container.sh -n sonic-mgmt
         sed -i s/use_own_value/${username}/ ansible/veos_vtb
