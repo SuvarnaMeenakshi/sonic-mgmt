@@ -46,7 +46,7 @@ stages:
         sudo gzip -fd /data/sonic-vm/images/sonic-vs.img.gz
         username=$(id -un)
         sudo chown -R $username.$username /data/sonic-vm
-        pushd  /var/src/$parent_dir/
+        pushd  /data/sonic-mgmt
         git remote update
         git reset --hard origin/master
         docker rm -f sonic-mgmt || true
