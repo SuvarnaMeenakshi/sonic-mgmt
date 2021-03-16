@@ -48,7 +48,7 @@ stages:
         sudo chown -R $username.$username /data/sonic-vm
         pushd  /data/sonic-mgmt
         git remote update
-        git reset --hard origin/masic_fixes
+        git checkout masic_fixes
         docker rm -f sonic-mgmt || true
         ./setup-container.sh -n sonic-mgmt
         sed -i s/use_own_value/${username}/ ansible/veos_vtb
