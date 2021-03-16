@@ -48,6 +48,8 @@ stages:
         sudo chown -R $username.$username /data/sonic-vm
         pushd  /data/sonic-mgmt
         git remote update
+        echo $PWD
+        git branch -a
         git checkout origin/masic_fixes
         docker rm -f sonic-mgmt || true
         ./setup-container.sh -n sonic-mgmt
