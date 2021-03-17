@@ -69,7 +69,7 @@ stages:
               --testbed=$(tbname) --host-pattern=$(dut) --inventory=$parent_dir/ansible/veos_vtb \
               --testbed_file=$parent_dir/ansible/vtestbed.csv --module-path=$parent_dir/ansible/library \
               --show-capture=no --log-cli-level=INFO  \
-              --skip_sanity" --disable_loganalyzer"
+              --skip_sanity --disable_loganalyzer"
         docker exec sonic-mgmt-masic bash -c "$CMD"
         if [ "${PIPESTATUS[0]}" -ne "0" ]; then
             # save dut state if test fails
