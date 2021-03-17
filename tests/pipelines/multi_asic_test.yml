@@ -65,7 +65,7 @@ stages:
         parent_dir="/data/sonic-mgmt"
         CMD="cd $parent_dir/tests; \
         export ANSIBLE_CONFIG=$parent_dir/ansible ANSIBLE_LIBRARY=$parent_dir/ansible; \
-        pytest snmp/test_snmp_default_route.py \
+        pytest bgp/test_bgp_fact.py \
               --testbed=$(tbname) --host-pattern=$(dut) --inventory=$parent_dir/ansible/veos_vtb \
               --testbed_file=$parent_dir/ansible/vtestbed.csv --module-path=$parent_dir/ansible/library \
               --show-capture=no --log-cli-level=INFO  \
