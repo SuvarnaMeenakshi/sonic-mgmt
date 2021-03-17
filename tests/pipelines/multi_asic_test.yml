@@ -50,7 +50,7 @@ stages:
         git remote update
         git reset --hard origin/master
         docker rm -f sonic-mgmt-masic || true
-        ./setup-container.sh -n sonic-mgmt-masic -d /data/sonic-mgmt
+        ./setup-container.sh -n sonic-mgmt-masic -d /data
         sed -i s/use_own_value/${username}/ ansible/veos_vtb
         echo aaa > ansible/password.txt
         parent_dir="/data/sonic-mgmt"
