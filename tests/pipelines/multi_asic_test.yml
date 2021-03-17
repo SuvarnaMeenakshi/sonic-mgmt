@@ -50,26 +50,26 @@ stages:
         git remote update
         git reset --hard origin/master
         docker rm -f sonic-mgmt || true
-        ./setup-container.sh -n sonic-mgmt
+        ./setup-container.sh -n sonic-mgmt -d /data/sonic-mgmt
         sed -i s/use_own_value/${username}/ ansible/veos_vtb
         echo aaa > ansible/password.txt
-        parent_dir=$(basename $PWD)
-        docker exec sonic-mgmt bash -c "pushd /var/src/$parent_dir/ansible;./testbed-cli.sh -d /data/sonic-vm -m $(inventory) -t $(testbed_file) -k ceos refresh-dut $(tbname) password.txt; ./testbed-cli.sh -m $(inventory) -t $(testbed_file) deploy-mg $(tbname) veos_vtb password.txt" && sleep 180
+        parent_dir="/data/sonic-mgmt"
+        docker exec sonic-mgmt bash -c "pushd $parent_dir/ansible;./testbed-cli.sh -d /data/sonic-vm -m $(inventory) -t $(testbed_file) -k ceos refresh-dut $(tbname) password.txt; ./testbed-cli.sh -m $(inventory) -t $(testbed_file) deploy-mg $(tbname) veos_vtb password.txt" && sleep 180
       displayName: "Setup t1-8-lag testbed"
 
     - script: |
         pwd
         username=$(id -un)
         rm -rf $(Build.ArtifactStagingDirectory)/*
-        parent_dir=$(basename $PWD)
-        CMD="cd /var/src/$parent_dir/tests; \
-        export ANSIBLE_CONFIG=/var/src/$parent_dir/ansible ANSIBLE_LIBRARY=/var/src/$parent_dir/ansible; \
+        parent_dir="/data/sonic-mgmt"
+        CMD="cd $parent_dir/tests; \
+        export ANSIBLE_CONFIG=$parent_dir/ansible ANSIBLE_LIBRARY=$parent_dir/ansible; \
         pytest snmp/test_snmp_default_route.py \
-              --testbed=$(tbname) --host-pattern=$(dut) --inventory=/var/src/$parent_dir/ansible/veos_vtb \
-              --testbed_file=/var/src/$parent_dir/ansible/vtestbed.csv --module-path=/var/src/$parent_dir/ansible/library \
+              --testbed=$(tbname) --host-pattern=$(dut) --inventory=$parent_dir/ansible/veos_vtb \
+              --testbed_file=$parent_dir/ansible/vtestbed.csv --module-path=$parent_dir/ansible/library \
               --show-capture=no --log-cli-level=INFO  \
-              --skip_sanity --log-file=/var/src/$parent_dir/tests/logs/snmp"
-        docker exec sonic-mgmt bash -c "rm -rf /var/src/$parent_dir/tests/logs/snmp || true"
+              --skip_sanity --log-file=$parent_dir/tests/logs/snmp"
+        docker exec sonic-mgmt bash -c "rm -rf $parent_dir/tests/logs/snmp || true"
         docker exec sonic-mgmt bash -c "$CMD"
         if [ "${PIPESTATUS[0]}" -ne "0" ]; then
             # save dut state if test fails
