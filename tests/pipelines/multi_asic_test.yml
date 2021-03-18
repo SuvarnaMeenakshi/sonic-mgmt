@@ -65,8 +65,7 @@ stages:
         username=$(id -un)
         rm -rf $(Build.ArtifactStagingDirectory)/*
         parent_dir="/data/sonic-mgmt"
-        TESTS="\
-        bgp/test_bgp_fact.py \
+        tests="bgp/test_bgp_fact.py \
         snmp/test_snmp_cpu.py \
         snmp/test_snmp_interfaces.py \
         snmp/test_snmp_lldp.py \
@@ -76,7 +75,7 @@ stages:
         snmp/test_snmp_default_route.py"
         CMD="cd $parent_dir/tests; \
         export ANSIBLE_CONFIG=$parent_dir/ansible ANSIBLE_LIBRARY=$parent_dir/ansible; \
-        ./run_tests.sh -c $(TESTS) -d $(dut) -f $(testbed_file) -i $(inventory) -n $(tbname) -e --disable_loganalyzer -u"
+        ./run_tests.sh -c $(tests) -d $(dut) -f $(testbed_file) -i $(inventory) -n $(tbname) -e --disable_loganalyzer -u"
         docker exec sonic-mgmt-masic bash -c "$CMD"
       displayName: "multi-asic t1-lag tests"
       continueOnError: true 
