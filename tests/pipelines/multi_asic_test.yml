@@ -71,7 +71,7 @@ stages:
       displayName: "BGP test"
       continueOnError: true 
 
-   - script: |
+    - script: |
         # save dut state if test fails
         virsh_version=$(virsh --version)
         if [ $virsh_version == "6.0.0" ]; then
