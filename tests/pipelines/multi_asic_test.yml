@@ -63,7 +63,6 @@ stages:
         username=$(id -un)
         rm -rf $(Build.ArtifactStagingDirectory)/*
         parent_dir="/data/sonic-mgmt"
-        CMD="
         CMD="cd $parent_dir/tests; \
         export ANSIBLE_CONFIG=$parent_dir/ansible ANSIBLE_LIBRARY=$parent_dir/ansible; \
         ./run_tests.sh -c bgp/test_bgp_fact.py -d $(dut) -f vtestbed.csv -i \
