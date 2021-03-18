@@ -65,9 +65,18 @@ stages:
         username=$(id -un)
         rm -rf $(Build.ArtifactStagingDirectory)/*
         parent_dir="/data/sonic-mgmt"
+        TESTS="\
+        bgp/test_bgp_fact.py \
+        snmp/test_snmp_cpu.py \
+        snmp/test_snmp_interfaces.py \
+        snmp/test_snmp_lldp.py \
+        snmp/test_snmp_pfc_counters.py \
+        snmp/test_snmp_queue.py \
+        snmp/test_snmp_loopback.py \
+        snmp/test_snmp_default_route.py"
         CMD="cd $parent_dir/tests; \
         export ANSIBLE_CONFIG=$parent_dir/ansible ANSIBLE_LIBRARY=$parent_dir/ansible; \
-        ./run_tests.sh -c bgp/test_bgp_fact.py -d $(dut) -f vtestbed.csv -i \
+        ./run_tests.sh -c "$TESTS" -d $(dut) -f vtestbed.csv -i \
         veos_vtb -n $(tbname) -e --disable_loganalyzer"
         docker exec sonic-mgmt-masic bash -c "$CMD"
       displayName: "BGP test"
@@ -93,6 +102,7 @@ stages:
       condition: failed()
     
     - script: |
+        pushd  /data/sonic-mgmt
         cp -r ./tests/logs $(Build.ArtifactStagingDirectory)/
         username=$(id -un)
         sudo chown -R $username.$username $(Build.ArtifactStagingDirectory)
