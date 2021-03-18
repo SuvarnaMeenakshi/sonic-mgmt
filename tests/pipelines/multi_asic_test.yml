@@ -76,10 +76,9 @@ stages:
         snmp/test_snmp_default_route.py"
         CMD="cd $parent_dir/tests; \
         export ANSIBLE_CONFIG=$parent_dir/ansible ANSIBLE_LIBRARY=$parent_dir/ansible; \
-        ./run_tests.sh -c "$TESTS" -d $(dut) -f vtestbed.csv -i \
-        veos_vtb -n $(tbname) -e --disable_loganalyzer"
+        ./run_tests.sh -c $(TESTS) -d $(dut) -f $(testbed_file) -i $(inventory) -n $(tbname) -e --disable_loganalyzer -u"
         docker exec sonic-mgmt-masic bash -c "$CMD"
-      displayName: "BGP test"
+      displayName: "multi-asic t1-lag tests"
       continueOnError: true 
 
     - script: |
