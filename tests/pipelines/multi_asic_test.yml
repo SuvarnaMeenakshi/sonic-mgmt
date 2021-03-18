@@ -32,6 +32,8 @@ stages:
     value: vtestbed.csv
   - name: ptf_name
     value: ptf_test
+  - name: tbtype
+    value: t1-8-lag
 
   jobs:
   - job: four_asic_vs_test 
@@ -77,14 +79,14 @@ stages:
         if [ $virsh_version == "6.0.0" ]; then
             mkdir -p $(Build.ArtifactStagingDirectory)/kvmdump
             virsh -c qemu:///system list
-            virsh -c qemu:///system save ${{ parameters.dut }} $(Build.ArtifactStagingDirectory)/kvmdump/${{ parameters.dut }}.memdmp
-            virsh -c qemu:///system dumpxml ${{ parameters.dut }} > $(Build.ArtifactStagingDirectory)/kvmdump/${{ parameters.dut }}.xml
-            img=$(virsh -c qemu:///system domblklist ${{ parameters.dut }} | grep vda | awk '{print $2}')
-            cp $img $(Build.ArtifactStagingDirectory)/kvmdump/${{ parameters.dut }}.img
-            virsh -c qemu:///system undefine ${{ parameters.dut }}
+            virsh -c qemu:///system save $(dut) $(Build.ArtifactStagingDirectory)/kvmdump/$(dut).memdmp
+            virsh -c qemu:///system dumpxml $(dut) > $(Build.ArtifactStagingDirectory)/kvmdump/$(dut).xml
+            img=$(virsh -c qemu:///system domblklist $(dut) | grep vda | awk '{print $2}')
+            cp $img $(Build.ArtifactStagingDirectory)/kvmdump/$(dut).img
+            virsh -c qemu:///system undefine $(dut)
         fi
     
-        docker commit ${{ parameters.ptf_name }} docker-ptf:$(Build.BuildNumber)
+        docker commit $(ptf_name) docker-ptf:$(Build.BuildNumber)
         docker save docker-ptf:$(Build.BuildNumber) | gzip -c > $(Build.ArtifactStagingDirectory)/kvmdump/docker-ptf-dump.gz
         docker rmi docker-ptf:$(Build.BuildNumber)
       displayName: "Collect kvmdump"
@@ -98,17 +100,17 @@ stages:
       condition: succeededOrFailed()
     
     - publish: $(Build.ArtifactStagingDirectory)/kvmdump
-      artifact: sonic-buildimage.kvmtest.${{ parameters.tbtype}}.memdump@$(System.JobAttempt)
+      artifact: sonic-buildimage.kvmtest.$(tbtype).memdump@$(System.JobAttempt)
       displayName: "Archive sonic kvm memdump"
       condition: failed()
     
     - publish: $(Build.ArtifactStagingDirectory)/logs
-      artifact: sonic-buildimage.kvmtest.${{ parameters.tbtype }}.log@$(System.JobAttempt)
+      artifact: sonic-buildimage.kvmtest.$(tbtype).log@$(System.JobAttempt)
       displayName: "Archive sonic kvm logs"
       condition: succeededOrFailed()
     
     - task: PublishTestResults@2
       inputs:
         testResultsFiles: '$(Build.ArtifactStagingDirectory)/logs/**/*.xml'
-        testRunTitle: kvmtest.${{ parameters.tbtype }}
+        testRunTitle: kvmtest.$(tbtype)
       condition: succeededOrFailed()
