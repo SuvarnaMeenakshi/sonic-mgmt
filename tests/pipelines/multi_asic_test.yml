@@ -61,6 +61,7 @@ stages:
       displayName: "Setup t1-8-lag testbed"
 
     - script: |
+        sleep 120
         pwd
         username=$(id -un)
         rm -rf $(Build.ArtifactStagingDirectory)/*
