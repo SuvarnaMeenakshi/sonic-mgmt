@@ -23,9 +23,9 @@ stages:
   pool: sonictest
   variables:
   - name: dut
-    value: vlab-01
+    value: vlab-08
   - name: tbname
-    value: vms-kvm-t0
+    value: vms-kvm-four-asic-t1-lag
   - name: inventory
     value: veos_vtb
   - name: testbed_file
@@ -33,7 +33,7 @@ stages:
   - name: ptf_name
     value: ptf_test
   - name: tbtype
-    value: t0
+    value: t1-8-lag
 
   jobs:
   - job: four_asic_vs_test 
@@ -43,7 +43,7 @@ stages:
 
     - script: |
         sudo mkdir -p /data/sonic-vm/images
-        wget https://sonic-jenkins.westus2.cloudapp.azure.com/job/vs/job/buildimage-vs-image-201911/lastSuccessfulBuild/artifact/target/sonic-vs.img.gz
+        wget https://sonic-jenkins.westus2.cloudapp.azure.com/job/vs/job/buildimage-multiasic-vs-image-201911/lastSuccessfulBuild/artifact/target/sonic-vs.img.gz
         sudo cp -v ./sonic-vs.img.gz /data/sonic-vm/images/sonic-vs.img.gz
         sudo gzip -fd /data/sonic-vm/images/sonic-vs.img.gz
         username=$(id -un)
@@ -61,8 +61,8 @@ stages:
       displayName: "Setup t1-8-lag testbed"
 
     - script: |
-        docker ps
         sleep 120
+        docker ps
         pwd
         username=$(id -un)
         rm -rf $(Build.ArtifactStagingDirectory)/*
