@@ -103,6 +103,7 @@ stages:
       condition: failed()
     
     - script: |
+        docker ps
         pushd  /data/sonic-mgmt
         cp -r ./tests/logs $(Build.ArtifactStagingDirectory)/
         username=$(id -un)
