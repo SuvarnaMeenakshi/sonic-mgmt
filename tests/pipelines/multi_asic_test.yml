@@ -81,7 +81,7 @@ stages:
         echo $CMD
         docker exec sonic-mgmt-masic bash -c "$CMD"
       displayName: "multi-asic t1-lag tests"
-      continueOnError: true 
+      continueOnError: false
 
     - script: |
         # save dut state if test fails
