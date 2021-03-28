@@ -61,7 +61,6 @@ stages:
       displayName: "Setup t1-8-lag testbed"
 
     - script: |
-        sudo virsh reboot vlab-08
         sleep 240
         docker ps
         pwd
@@ -86,6 +85,7 @@ stages:
 
     - script: |
         # save dut state if test fails
+        docker exec sonic-mgmt-masic bash -c "pushd /data/sonic-mgmt/ansible;./testbed-cli.sh -d /data/sonic-vm -m $(inventory) -t $(testbed_file) -k ceos remove-topo $(tbname) password.txt
         virsh_version=$(virsh --version)
         if [ $virsh_version == "6.0.0" ]; then
             mkdir -p $(Build.ArtifactStagingDirectory)/kvmdump
