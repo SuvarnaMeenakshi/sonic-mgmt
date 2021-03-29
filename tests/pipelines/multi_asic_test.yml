@@ -61,15 +61,13 @@ stages:
       displayName: "Setup t1-8-lag testbed"
 
     - script: |
+        sleep 480
         docker ps
         pwd
         username=$(id -un)
         rm -rf $(Build.ArtifactStagingDirectory)/*
         parent_dir="/data/sonic-mgmt"
         tests="bgp/test_bgp_fact.py \
-        snmp/test_snmp_cpu.py \
-        snmp/test_snmp_interfaces.py \
-        snmp/test_snmp_lldp.py \
         snmp/test_snmp_pfc_counters.py \
         snmp/test_snmp_queue.py \
         snmp/test_snmp_loopback.py \
@@ -95,7 +93,7 @@ stages:
             virsh -c qemu:///system undefine $(dut)
         fi
     
-        docker commit $(ptf_name) docker-ptf:$(Build.BuildNumber)
+        docker commit $(ptf_name) docker-ptf:${Build.BuildNumber// /_}
         docker save docker-ptf:$(Build.BuildNumber) | gzip -c > $(Build.ArtifactStagingDirectory)/kvmdump/docker-ptf-dump.gz
         docker rmi docker-ptf:$(Build.BuildNumber)
       displayName: "Collect kvmdump"
