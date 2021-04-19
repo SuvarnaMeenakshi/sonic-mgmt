@@ -57,10 +57,12 @@ stages:
         echo aaa > ansible/password.txt
         parent_dir="/data/sonic-mgmt"
         docker exec sonic-mgmt-masic bash -c "find / -name ansible"
-        docker exec sonic-mgmt-masic bash -c "pushd $parent_dir/ansible;./testbed-cli.sh -d /data/sonic-vm -m $(inventory) -t $(testbed_file) -k ceos remove-topo $(tbname) password.txt; ./testbed-cli.sh -d /data/sonic-vm -m $(inventory) -t $(testbed_file) -k ceos refresh-dut $(tbname) password.txt; ./testbed-cli.sh -m $(inventory) -t $(testbed_file) deploy-mg $(tbname) veos_vtb password.txt" && sleep 120
+        docker exec sonic-mgmt-masic bash -c "pushd $parent_dir/ansible; ./testbed-cli.sh -d /data/sonic-vm -m $(inventory) -t $(testbed_file) -k ceos refresh-dut $(tbname) password.txt; ./testbed-cli.sh -m $(inventory) -t $(testbed_file) deploy-mg $(tbname) veos_vtb password.txt" && sleep 120
       displayName: "Setup t1-8-lag testbed"
 
     - script: |
+        sudo virsh reboot $(dut)
+        sleep 120
         docker ps
         username=$(id -un)
         rm -rf $(Build.ArtifactStagingDirectory)/*
