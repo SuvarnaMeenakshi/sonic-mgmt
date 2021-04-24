@@ -87,6 +87,8 @@ stages:
             cp $img $(Build.ArtifactStagingDirectory)/kvmdump/$(dut).img
             virsh -c qemu:///system undefine $(dut)
         fi
+        echo "${Build.BuildNumber// /_}"
+        echo "${Build.BuildNumber}"
         build_number=$(echo "${Build.BuildNumber// /_}") 
         docker commit $(ptf_name) docker-ptf:$(build_number)
         docker save docker-ptf:$(Build.BuildNumber) | gzip -c > $(Build.ArtifactStagingDirectory)/kvmdump/docker-ptf-dump.gz
