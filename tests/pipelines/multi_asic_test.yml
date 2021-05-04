@@ -67,11 +67,18 @@ stages:
         username=$(id -un)
         rm -rf $(Build.ArtifactStagingDirectory)/*
         parent_dir="/data/sonic-mgmt"
-        tests="bgp/test_bgp_fact.py \
+        tests="test_interfaces.py \
+        bgp/test_bgp_fact.py \
+        bgp/test_bgp_allow_list.py \
+        lldp/test_lldp.py \
+        route/test_default_route.py \
         snmp/test_snmp_pfc_counters.py \
         snmp/test_snmp_queue.py \
         snmp/test_snmp_loopback.py \
-        snmp/test_snmp_default_route.py"
+        snmp/test_snmp_default_route.py \
+        tacacs/test_rw_user.py \
+        tacacs/test_ro_user.py \
+        tacacs/test_jit_user.py"
         CMD="cd $parent_dir/tests; \
         export ANSIBLE_CONFIG=$parent_dir/ansible ANSIBLE_LIBRARY=$parent_dir/ansible; \
         ./run_tests.sh -c \"$tests\" -d $(dut) -f $(testbed_file) -i $(inventory) -n $(tbname) -e --disable_loganalyzer -u"
@@ -92,12 +99,6 @@ stages:
             cp $img $(Build.ArtifactStagingDirectory)/kvmdump/$(dut).img
             virsh -c qemu:///system undefine $(dut)
         fi
-        echo "${Build.BuildNumber// /_}"
-        echo "${Build.BuildNumber}"
-        build_number=$(echo "${Build.BuildNumber// /_}") 
-        docker commit $(ptf_name) docker-ptf:$(build_number)
-        docker save docker-ptf:$(Build.BuildNumber) | gzip -c > $(Build.ArtifactStagingDirectory)/kvmdump/docker-ptf-dump.gz
-        docker rmi docker-ptf:$(Build.BuildNumber)
       displayName: "Collect kvmdump"
       condition: failed()
     
