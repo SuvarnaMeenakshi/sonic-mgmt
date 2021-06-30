@@ -16,6 +16,7 @@
     serial_port: "{{ hostvars[dut_name]['serial_port'] }}"
     hwsku: "{{ hostvars[dut_name].hwsku }}"
     num_asic: "{{ hostvars[dut_name]['num_asics'] | default(1) }}"
+    masic_mount: "{{ sonic_vm_storage_location }}/masic_mount"
 
 - name: Remove arp entry for {{ dut_name }}
   shell: arp -d {{ mgmt_ip_address }}
@@ -36,6 +37,26 @@
 - name: Get DUT port alias
   port_alias: hwsku={{ hostvars[dut_name].hwsku }} num_asic={{ num_asic }}
   delegate_to: localhost
+
+- name: Generate asic.conf
+  template: src=asic.conf.j2 dest={{ sonic_vm_storage_location }}/asic.conf
+
+- name: Convert to multi-asic VS
+  shell: |
+         mkdir {{ masic_mount }}
+         sudo modprobe nbd max_part=8
+         sudo qemu-nbd -n --connect=/dev/nbd0 {{ disk_image }}
+         VM_PARTITION=`sudo fdisk /dev/nbd0 -l | grep "Linux filesystem" | awk '{print $1}'`
+         sudo mount $VM_PARTITION {{ masic_mount }}
+         ls {{ masic_mount }} >> {{ sonic_vm_storage_location }}/log
+         sudo unsquashfs -f -d {{ sonic_vm_storage_location }}/squashfs-root {{ masic_mount }}/image*/fs.squashfs
+         sudo bash -c 'cat {{ sonic_vm_storage_location }}/asic.conf > {{ sonic_vm_storage_location }}/squashfs-root/usr/share/sonic/device/x86_64-kvm_x86_64-r0/asic.conf'
+         sudo mksquashfs {{ sonic_vm_storage_location }}/squashfs-root {{ masic_mount }}/image*/fs.squashfs -noappend
+         sudo umount {{ masic_mount }}
+         sudo qemu-nbd --disconnect /dev/nbd0
+         sudo rmmod nbd
+         sudo rm -rf {{ sonic_vm_storage_location }}/squashfs-root/
+         rm -rf {{ masic_mount }}
 
 - name: Define SONiC vm {{ dut_name }}
   virt: name={{ dut_name }}

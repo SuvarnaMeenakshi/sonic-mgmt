@@ -1,0 +1,6 @@
+NUM_ASIC={{ num_asic }}
+{% if num_asic|int > 1 %}
+{% for index in range(num_asic|int) %}
+DEV_ID_ASIC_{{ index }}={{ index }}
+{% endfor %}
+{%- endif -%}
