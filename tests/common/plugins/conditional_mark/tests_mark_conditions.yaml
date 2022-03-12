@@ -108,6 +108,13 @@ iface_namingmode/test_iface_namingmode.py::TestShowQueue::test_show_queue_waterm
     conditions:
       - "platform in ['x86_64-cel_e1031-r0']"
 
+iface_namingmode/test_iface_namingmode.py::TestConfigInterface::test_config_interface_speed:
+  xfail:
+    reason: "10G speed is not supported"
+    strict: True
+    conditions:
+      - "topo_name in ['t2', 't2_2lc_36p-masic', 't2_2lc_min_ports-masic']"
+
 #######################################
 #####           ntp               #####
 #######################################
