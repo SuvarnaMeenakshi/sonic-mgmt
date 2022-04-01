@@ -136,9 +136,9 @@ def verify_snmp_speed(facts, snmp_facts, results):
     return results
 
 @pytest.mark.bsl
-def test_snmp_interfaces(localhost, creds_all_duts, duthosts, enum_rand_one_per_hwsku_hostname, enum_asic_index):
+def test_snmp_interfaces(localhost, creds_all_duts, duthosts, enum_rand_one_per_hwsku_frontend_hostname, enum_asic_index):
     """compare the snmp facts between observed states and target state"""
-    duthost = duthosts[enum_rand_one_per_hwsku_hostname]
+    duthost = duthosts[enum_rand_one_per_hwsku_frontend_hostname]
     if duthost.is_supervisor_node():
         pytest.skip("interfaces not present on supervisor node")
     hostip = duthost.host.options['inventory_manager'].get_host(duthost.hostname).vars['ansible_host']
@@ -159,10 +159,10 @@ def test_snmp_interfaces(localhost, creds_all_duts, duthosts, enum_rand_one_per_
         assert po_name in snmp_ifnames, "PortChannel not found in SNMP facts."
 
 @pytest.mark.bsl
-def test_snmp_mgmt_interface(localhost, creds_all_duts, duthosts, enum_rand_one_per_hwsku_hostname):
+def test_snmp_mgmt_interface(localhost, creds_all_duts, duthosts, enum_rand_one_per_hwsku_frontend_hostname):
     """compare the snmp facts between observed states and target state"""
 
-    duthost = duthosts[enum_rand_one_per_hwsku_hostname]
+    duthost = duthosts[enum_rand_one_per_hwsku_frontend_hostname]
     hostip = duthost.host.options['inventory_manager'].get_host(duthost.hostname).vars['ansible_host']
 
     snmp_facts = get_snmp_facts(localhost, host=hostip, version="v2c", community=creds_all_duts[duthost.hostname]["snmp_rocommunity"], wait=True)['ansible_facts']
@@ -186,10 +186,10 @@ def test_snmp_mgmt_interface(localhost, creds_all_duts, duthosts, enum_rand_one_
         result = verify_port_ifindex(snmp_facts, speed_snmp)
         pytest_assert(not result, "Unexpected comparsion of SNMP: {}".format(result))
 
-def test_snmp_interfaces_mibs(duthosts, enum_rand_one_per_hwsku_hostname, localhost, creds_all_duts, enum_asic_index):
+def test_snmp_interfaces_mibs(duthosts, enum_rand_one_per_hwsku_frontend_hostname, localhost, creds_all_duts, enum_asic_index):
     """Verify correct behaviour of port MIBs ifIndex, ifMtu, ifSpeed,
        ifAdminStatus, ifOperStatus, ifAlias, ifHighSpeed, ifType """
-    duthost = duthosts[enum_rand_one_per_hwsku_hostname]
+    duthost = duthosts[enum_rand_one_per_hwsku_frontend_hostname]
     namespace = duthost.get_namespace_from_asic_id(enum_asic_index)
     hostip = duthost.host.options['inventory_manager'].get_host(duthost.hostname).vars['ansible_host']
     snmp_facts = get_snmp_facts(localhost, host=hostip, version="v2c", community=creds_all_duts[duthost.hostname]["snmp_rocommunity"], wait=True)['ansible_facts']
