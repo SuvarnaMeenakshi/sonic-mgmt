@@ -156,6 +156,7 @@ all:
           ansible_user: admin
           iface_speed: 40000
           start_topo_service: True
+          detected_asics: [0,1,2,3]
           frontend_asics: [0,1]
           loopback4096_ip: [8.0.0.0/32, 8.0.0.1/32, 8.0.0.2/32, 8.0.0.3/32]
           loopback4096_ipv6: [2603:10e2:400::/128, 2603:10e2:400::1/128, 2603:10e2:400::2/128, 2603:10e2:400::3/128]
