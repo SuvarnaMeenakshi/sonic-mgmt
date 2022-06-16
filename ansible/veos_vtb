@@ -151,7 +151,7 @@ all:
           type: kvm
           hwsku: msft_four_asic_vs
           serial_port: 9005
-          num_asics: 4
+          num_asics: 3
           ansible_password: password
           ansible_user: admin
           iface_speed: 40000
@@ -242,7 +242,7 @@ vm_host_1:
   hosts:
     STR-ACS-VSERV-01:
       ansible_host: 172.17.0.1
-      ansible_user: use_own_value
+      ansible_user: sumeenak
 
 vms_1:
   hosts:
