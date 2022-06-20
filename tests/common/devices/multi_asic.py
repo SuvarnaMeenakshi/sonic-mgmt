@@ -31,13 +31,11 @@ class MultiAsicSonicHost(object):
             hostname: Name of the host in the ansible inventory
         """
         self.sonichost = SonicHost(ansible_adhoc, hostname)
-        self.asics = [SonicAsic(self.sonichost, asic_index) for asic_index in range(self.sonichost.facts["num_asic"])]
+        self.asics = [SonicAsic(self.sonichost, asic_index) for asic_index in self.sonichost.facts["detected_asics"]]
 
         # Get the frontend and backend asics in a multiAsic device.
         self.frontend_asics = []
         self.backend_asics = []
-        if self.sonichost.is_supervisor_node():
-            self.backend_asics = [SonicAsic(self.sonichost, asic_index) for asic_index in self.sonichost.facts["detected_asics"]]
         elif self.sonichost.is_multi_asic:
             for asic in self.asics:
                 if asic.is_it_frontend():
