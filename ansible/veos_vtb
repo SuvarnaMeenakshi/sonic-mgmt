@@ -63,8 +63,8 @@ all:
           ansible_host: 10.250.0.109
           ansible_hostv6: fec0::ffff:afa:9
         ptf-05:
-          ansible_host: 10.250.0.110
-          ansible_hostv6: fec0::ffff:afa:a
+          ansible_host: 10.250.0.113
+          ansible_hostv6: fec0::ffff:afa:d
         ptf-06:
           ansible_host: 10.250.0.116
           ansible_hostv6: fec0::ffff:afb:2
