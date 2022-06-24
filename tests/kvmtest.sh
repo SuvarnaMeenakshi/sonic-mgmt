@@ -252,7 +252,6 @@ test_multi_asic_t1_lag() {
     tgname=multi_asic_t1_lag
     tests="\
     bgp/test_bgp_fact.py \
-    snmp/test_snmp_default_route.py \
     snmp/test_snmp_loopback.py \
     snmp/test_snmp_pfc_counters.py \
     snmp/test_snmp_queue.py \
