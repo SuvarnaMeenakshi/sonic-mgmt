@@ -209,6 +209,7 @@ def sanity_check(localhost, duthosts, request, fanouthosts, nbrhosts, tbinfo):
 
         check_results = do_checks(request, pre_check_items, stage=STAGE_PRE_TEST)
         logger.debug("Pre-test sanity check results:\n%s" % json.dumps(check_results, indent=4, default=fallback_serializer))
+        logger.error("~~~~".format(json.dumps(failed_results, indent=4, default=fallback_serializer)))
 
         failed_results = [result for result in check_results if result['failed']]
         if failed_results:
