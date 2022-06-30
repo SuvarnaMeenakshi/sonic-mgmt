@@ -251,16 +251,7 @@ test_t1_lag() {
 test_multi_asic_t1_lag() {
     tgname=multi_asic_t1_lag
     tests="\
-    bgp/test_bgp_fact.py \
-    snmp/test_snmp_loopback.py \
-    snmp/test_snmp_pfc_counters.py \
-    snmp/test_snmp_queue.py \
-    tacacs/test_accounting.py \
-    tacacs/test_authorization.py \
-    tacacs/test_jit_user.py \
-    tacacs/test_ro_disk.py \
-    tacacs/test_ro_user.py \
-    tacacs/test_rw_user.py"
+    bgp/test_bgp_fact.py"
 
     pushd $SONIC_MGMT_DIR/tests
     # TODO: Remove disable of loganaler and sanity check once multi-asic testbed is stable.
