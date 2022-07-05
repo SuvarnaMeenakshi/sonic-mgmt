@@ -108,7 +108,7 @@
 
 - conf-name: vms-kvm-four-asic-t1-lag
   group-name: vms6-4
-  topo: t1-8-lag
+  topo: t1-3-lag
   ptf_image_name: docker-ptf
   ptf: ptf-05
   ptf_ip: 10.250.0.110/24
