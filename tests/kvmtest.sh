@@ -85,7 +85,6 @@ RUNTEST_CLI_COMMON_OPTS="\
 -k debug \
 -l warning \
 -m individual \
--q 1 \
 -a False \
 -O \
 -r \
