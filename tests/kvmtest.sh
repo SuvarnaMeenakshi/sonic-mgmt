@@ -114,7 +114,8 @@ test_t0() {
       bgp/test_bgpmon.py \
       bgp/test_bgp_update_timer.py \
       container_checker/test_container_checker.py \
-      cacl/test_cacl_application.py \
+      # TODO: Add the below test back once buildimage PR #12195 is merged.
+      #cacl/test_cacl_application.py \
       cacl/test_cacl_function.py \
       dhcp_relay/test_dhcp_relay.py \
       dhcp_relay/test_dhcpv6_relay.py \
