@@ -175,7 +175,7 @@ t0-sonic:
 dualtor:
   - arp/test_arp_extended.py
 
-t1-lag:
+t1-lag: &t1-lag
   - arp/test_arpall.py
   - arp/test_neighbor_mac_noptf.py
   - bgp/test_bgp_allow_list.py
@@ -218,27 +218,7 @@ t1-lag:
   - test_interfaces.py
 
 multi-asic-t1-lag:
-  - bgp/test_bgp_bbr.py
-  - bgp/test_bgp_fact.py
-  - bgp/test_bgp_update_timer.py
-  - snmp/test_snmp_default_route.py
-  - snmp/test_snmp_link_local_ip.py
-  - snmp/test_snmp_loopback.py
-  - snmp/test_snmp_pfc_counters.py
-  - snmp/test_snmp_queue.py
-  - tacacs/test_accounting.py
-  - tacacs/test_authorization.py
-  - tacacs/test_jit_user.py
-  - tacacs/test_ro_user.py
-  - tacacs/test_rw_user.py
-  - cacl/test_cacl_function.py
-  - monit/test_monit_status.py
-  - iface_namingmode/test_iface_namingmode.py
-  - scp/test_scp_copy.py
-  - test_interfaces.py
-  - process_monitoring/test_critical_process_monitoring.py
-  - container_checker/test_container_checker.py
-  - http/test_http_copy.py
+  <<: *t1-lag
 
 t2:
   - test_vs_chassis_setup.py
